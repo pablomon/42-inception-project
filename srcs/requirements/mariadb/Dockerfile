@@ -8,4 +8,5 @@ RUN chmod +x setup.sh
 
 COPY tools/50-server.cnf /etc/mysql/mariadb.conf.d
 
-ENTRYPOINT ["bin/bash", "/setup.sh"]
+ENTRYPOINT ["bin/bash", "setup.sh"]
+

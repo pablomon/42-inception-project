@@ -1,9 +1,9 @@
 all: start
 
 start:
-	@echo "adding hosts..."
-	sudo echo '127.0.0.1 pmontese.42.fr' >> /etc/hosts 
-	sudo echo '127.0.0.1 www.pmontese.42.fr' >> /etc/hosts
+	@echo "adding pmontese.42.fr to hosts..."
+	sudo echo '127.0.0.1 pmontese.42.fr' >> /etc/hosts;
+	sudo echo '127.0.0.1 www.pmontese.42.fr' >> /etc/hosts;	
 	@echo "creating volume dirs..."
 	mkdir -p ~/data/wordpress
 	mkdir -p ~/data/mariadb
@@ -14,17 +14,30 @@ build:
 	cd ./srcs/ &&  docker-compose up --build
 
 up:
+	@echo "starting containers..."
 	cd ./srcs/ && docker-compose up
 
 down:
+	@echo "stopping containers..."
 	cd ./srcs/ && docker-compose down
 
-clean: down
-	cd ./srcs/ && docker system prune
-	@echo "removing persistent data..."
-	sudo rm -R ~/data/wordpress
-	sudo rm -R ~/data/mariadb
+ps:
+	cd ./srcs/ && docker-compose ps
+rmvol: down
+	docker volume rm $$(docker volume ls -q);
+	sudo rm -R ~/data/wordpress;\
+	sudo rm -R ~/data/mariadb;\
+	mkdir -p ~/data/wordpress;\
+	mkdir -p ~/data/mariadb;
+clean:	
+	docker stop $$(docker ps -qa);\
+	docker rm $$(docker ps -qa);\
+	docker rmi -f $$(docker images -qa);\
+	docker network rm $$(docker network ls -q);\
+	docker volume rm $$(docker volume ls -q);\
+	sudo rm -R ~/data/wordpress;\
+	sudo rm -R ~/data/mariadb;
 
-re: clean start
+re: rmvol start
 
-.PHONY: start build up down clean re
+.PHONY: start build up down clean re ps

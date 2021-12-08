@@ -1,8 +1,8 @@
 #!bin/bash
-sleep 10					#Give mysql time to run
+sleep 5					#Give mysql time to run
 FILE=/var/www/wordpress/wp-config.php 
 if [ ! -f "$FILE" ]; then	#Test whether wordpress is already installed
-   wp core download --allow-root --path='/var/www/wordpress'
+   	wp core download --allow-root --path='/var/www/wordpress'
 	wp core config \
 		--allow-root \
 		--dbname=$DB_NAME \

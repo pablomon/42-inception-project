@@ -1,0 +1,70 @@
+version: "3.7"
+
+#restart policy always: If stopped restarts the container when docker daemon restars
+
+networks:
+        42net:
+
+volumes:
+        wordpress_vol:
+                driver: local
+                driver_opts:
+                        type: 'none'
+                        o: 'bind'
+                        device: '/home/pmontese/data/wordpress'
+        mariadb_vol:
+                driver: local
+                driver_opts:
+                        type: 'none'
+                        o: 'bind'
+                        device: '/home/pmontese/data/mariadb'
+
+services:
+    mariadb:
+        image: mariadb
+        volumes:
+            - mariadb_vol:/var/lib/mysql
+        restart: always
+        environment:
+            DB_NAME: "${DB_NAME}"
+            DB_LOGIN: "${DB_LOGIN}"
+            DB_PASS: "${DB_PASS}"
+        build: ./requirements/mariadb
+        networks:
+            42net:
+
+    wordpress:
+        depends_on:
+            - mariadb
+        image: wordpress
+        volumes:
+            - wordpress_vol:/var/www/wordpress
+        restart: always
+        environment:
+            DB_NAME: "${DB_NAME}"
+            WP_ADMIN: "${WP_ADMIN}"
+            WP_ADMINPASS: "${WP_ADMINPASS}"
+            WP_USER: "${WP_USER}"
+            WP_USERPASS: "${WP_USERPASS}"
+            DB_LOGIN: "${DB_LOGIN}"
+            DB_PASS: "${DB_PASS}"
+            DOMAIN: "${DOMAIN}"
+            WP_TITLE: "{$WP_TITLE}"
+        build: ./requirements/wordpress
+        networks:
+            42net:
+    
+    nginx:
+        image: nginx
+        restart: always
+        environment:
+            DOMAIN: ="${DOMAIN}"
+        depends_on:
+            - wordpress
+        ports:
+             - "443:443"
+        volumes:
+            - wordpress_vol:/var/www/wordpress
+        build: ./requirements/nginx
+        networks:
+            42net:
